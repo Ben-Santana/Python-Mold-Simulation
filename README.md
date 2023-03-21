@@ -1,5 +1,5 @@
 # Python Mold Simulation
- Timelapse video - https://www.youtube.com/watch?v=-dOYJLY8GYQ&ab_channel=BenSantana
+ [Timelapse video](https://www.youtube.com/watch?v=-dOYJLY8GYQ&ab_channel=BenSantana)
  
  ---
  
@@ -20,7 +20,9 @@
 And I also added a way to draw in a pheromone that attracts the white spores and repels the blue ones.
 
 Inspired heavily by Sebastian Lagues video on Ant and Slime Simulations.
- 
- 
+
+---
+
+## Controls
  
  
