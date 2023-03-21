@@ -1,7 +1,6 @@
 # Python Mold Simulation
- [Timelapse video](https://www.youtube.com/watch?v=-dOYJLY8GYQ&ab_channel=BenSantana)
- 
- ---
+
+ ## Description:
  
  A simple yet complex simulation of slime molds. The true beuaty of this simulation reveals itself in the simplicity of its rules:
 
@@ -24,6 +23,12 @@ And I also added a way to draw in a pheromone that attracts the white spores and
 Inspired heavily by Sebastian Lagues video on Ant and Slime Simulations.
 
 ---
+
+ ## Video
+ [Timelapse](https://www.youtube.com/watch?v=-dOYJLY8GYQ&ab_channel=BenSantana)
+ 
+---
+
 
 ## Controls:
 
