@@ -70,9 +70,6 @@ for n in range(numOfAgents):
 
 
 screen = pygame.display.set_mode((screenSize, screenSize))
-# blur = pygame.display.set_mode((screenSize, screenSize))
-
-# blur.fill(0, 0, 0)
 
 
 TMsectionAmount = screenSize / TMDiv
@@ -83,6 +80,9 @@ simRunning = True
 agentStart = False
 viewAgent = True
 viewPheramone = True
+showText = True
+
+blur = False
 
 
 def moveSensors(agentX: Agent):
@@ -349,21 +349,28 @@ def ProcessTrailMap():
             if TrailMap[r][c] > 1.0:
                 if viewPheramone:
                     if not agentStart:
+                        sectionCol = GetSectionAverage(r, c)
                         pygame.draw.rect(
                             screen,
-                            (105, 105, 175),
+                            (sectionCol * 240, sectionCol * 80, sectionCol * 80),
                             pygame.Rect(r * TMDiv, c * TMDiv, TMDiv, TMDiv),
                         )
                     else:
+                        sectionCol = GetSectionAverage(r, c)
                         pygame.draw.rect(
                             screen,
-                            (190, 175, 0),
+                            (sectionCol * 120, sectionCol * 40, sectionCol * 40),
                             pygame.Rect(r * TMDiv, c * TMDiv, TMDiv, TMDiv),
                         )
 
             elif TrailMap[r][c] > 0.0:
                 if viewAgent:
-                    sectionCol = TrailMap[r][c] * 255
+
+                    if blur:
+                        sectionCol = GetSectionAverage(r, c) * 255
+                    else:
+                        sectionCol = TrailMap[r][c] * 255
+
                     pygame.draw.rect(
                         screen,
                         (sectionCol, sectionCol, sectionCol),
@@ -375,12 +382,24 @@ def ProcessTrailMap():
                         TrailMap[r][c] = 0
             elif TrailMap[r][c] < 0:
                 if viewAgent:
-                    sectionCol = TrailMap[r][c] * 100
-                    pygame.draw.rect(
-                        screen,
-                        (-sectionCol, -sectionCol, -sectionCol + 100),
-                        pygame.Rect(r * TMDiv, c * TMDiv, TMDiv, TMDiv),
-                    )
+
+                    if blur:
+                        sectionCol = GetSectionAverage(r, c) * 100
+
+                        pygame.draw.rect(
+                            screen,
+                            (sectionCol, sectionCol, sectionCol + 100),
+                            pygame.Rect(r * TMDiv, c * TMDiv, TMDiv, TMDiv),
+                        )
+                    else:
+                        sectionCol = TrailMap[r][c] * 100
+
+                        pygame.draw.rect(
+                            screen,
+                            (-sectionCol, -sectionCol, -sectionCol + 100),
+                            pygame.Rect(r * TMDiv, c * TMDiv, TMDiv, TMDiv),
+                        )
+
                     if TrailMap[r][c] + 1 / trailLifeTime < 0:
                         TrailMap[r][c] = TrailMap[r][c] + 1 / trailLifeTime
                     else:
@@ -396,32 +415,92 @@ def drawPheramoneTrail():
                 ] = 2
 
 
+def GetSectionAverage(r: float, c: float):
+    secAverage = TrailMap[r][c]
+    sectionsConsidered = 1
+    if r != (screenSize / TMDiv) - 1:
+        secAverage += TrailMap[r + 1][c]
+        sectionsConsidered += 1
+    if c != (screenSize / TMDiv) - 1:
+        secAverage += TrailMap[r][c + 1]
+        sectionsConsidered += 1
+    if r != 0:
+        secAverage += TrailMap[r - 1][c]
+        sectionsConsidered += 1
+    if r != 0:
+        secAverage += TrailMap[r][c - 1]
+        sectionsConsidered += 1
+
+    if r != (screenSize / TMDiv) - 1 and c != (screenSize / TMDiv) - 1:
+        secAverage += TrailMap[r + 1][c + 1]
+        sectionsConsidered += 1
+    if r != (screenSize / TMDiv) - 1 and c != 0:
+        secAverage += TrailMap[r + 1][c - 1]
+        sectionsConsidered += 1
+    if r != 0 and c != (screenSize / TMDiv) - 1:
+        secAverage += TrailMap[r - 1][c + 1]
+        sectionsConsidered += 1
+    if r != 0 and c != 0:
+        secAverage += TrailMap[r - 1][c - 1]
+        sectionsConsidered += 1
+
+    if secAverage > sectionsConsidered:
+        return 1
+    if secAverage < 0:
+        if -secAverage > sectionsConsidered:
+            return 1
+        elif -secAverage <= sectionsConsidered:
+            return -secAverage / sectionsConsidered
+
+    return secAverage / sectionsConsidered
+
+
 def draw():
 
     screen.fill((0, 0, 0))
 
-    if not agentStart:
-        numOfAgentsText = font.render(str(numOfAgents), 1, (255, 255, 255))
+    if showText:
+        numOfAgentsText = font.render(str(numOfAgents), 1, (150, 150, 255))
         screen.blit(
             font.render("Agents             [-  +]: ", 1, (255, 255, 255)), (10, 10)
         )
         screen.blit(numOfAgentsText, (190, 10))
 
-        moveSpeedText = font.render(str(moveSpeed), 1, (255, 255, 255))
+        moveSpeedText = font.render(str(moveSpeed), 1, (150, 150, 255))
         screen.blit(
             font.render("Move Speed    [-1  +2]: ", 1, (255, 255, 255)), (10, 30)
         )
         screen.blit(moveSpeedText, (190, 30))
 
-        trailLifeTimeText = font.render(str(trailLifeTime / 100), 1, (255, 255, 255))
+        trailLifeTimeText = font.render(str(trailLifeTime / 100), 1, (150, 150, 255))
         screen.blit(
             font.render("Trail Life Time [-3  +4]: ", 1, (255, 255, 255)), (10, 50)
         )
         screen.blit(trailLifeTimeText, (190, 50))
 
         blueCultureText = font.render(str(blueCulture), 1, (150, 150, 255))
-        screen.blit(font.render("Blue Culture [G]: ", 1, (155, 155, 255)), (10, 70))
+        screen.blit(font.render("Blue Culture [G]: ", 1, (255, 255, 255)), (10, 70))
         screen.blit(blueCultureText, (190, 70))
+
+        screen.blit(
+            font.render("Toggle Showing Pheromone [P]", 1, (255, 255, 255)), (10, 90)
+        )
+        screen.blit(
+            font.render("Toggle Showing Spores [V]", 1, (255, 255, 255)), (10, 110)
+        )
+        screen.blit(
+            font.render("Toggle Showing Controls [C]", 1, (255, 255, 255)), (300, 10)
+        )
+        screen.blit(font.render("Blur [B](Beta)", 1, (255, 255, 255)), (300, 30))
+        screen.blit(
+            font.render("Click to place Pheromone", 1, (255, 255, 255)), (300, 50)
+        )
+        screen.blit(
+            font.render(
+                "Restart (click twice to remove pheromones [R])", 1, (255, 255, 255)
+            ),
+            (300, 70),
+        )
 
     ProcessTrailMap()
     # for agentX in ArrayAgents:
@@ -463,7 +542,11 @@ while simRunning:
             if event.key == pygame.K_v:
                 viewAgent = not viewAgent
             if event.key == pygame.K_b:
+                blur = not blur
+            if event.key == pygame.K_p:
                 viewPheramone = not viewPheramone
+            if event.key == pygame.K_c:
+                showText = not showText
             if event.key == pygame.K_EQUALS:
                 if not agentStart:
                     numOfAgents += 10
