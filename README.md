@@ -48,7 +48,9 @@ Run slime.py to run simulation
              
              Draw w/ mouse ~ place spore pheromone
              
-             B ~ see placed pheromone
+             P ~ see placed pheromone
+             
+             B ~ Blur spores (Beta) [currently causes significant lag, would reccomend <100 spores]
              
              
  
